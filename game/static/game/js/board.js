@@ -1493,36 +1493,56 @@
                 gameLayout.style.visibility = 'visible';
             };
 
+            
             if (welcomeAIBtn) welcomeAIBtn.onclick = () => {
+                modeSelection.style.display = 'none';
+                pveOptions.style.display = 'flex';
+
                 const whiteInput = document.getElementById('whiteNameInput');
                 const blackInput = document.getElementById('blackNameInput');
                 const errorDiv = document.getElementById('nameError');
-                
-                // Show ONLY white input for AI mode
+
                 if (whiteInput) {
                     whiteInput.style.display = 'block';
                     whiteInput.placeholder = 'Your Name';
-                    whiteInput.value = '';
                     whiteInput.classList.remove('input-error');
                 }
+
                 if (blackInput) {
                     blackInput.style.display = 'none';
                     blackInput.value = 'AI';
                     blackInput.classList.remove('input-error');
                 }
-                
-                // Hide error
-                if (errorDiv) errorDiv.style.display = 'none';
-                
-                nameInputs.style.display = 'flex';
-                modeSelection.style.display = 'none';
-                pveOptions.style.display = 'flex';
-            };
 
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+
+                nameInputs.style.display = 'flex';
+            };
+            
+            
             if (backToModes) backToModes.onclick = () => {
                 prepareWelcomeForPvP(false);
-            };
 
+                const whiteInput = document.getElementById('whiteNameInput');
+                const blackInput = document.getElementById('blackNameInput');
+                const errorDiv = document.getElementById('nameError');
+
+                if (whiteInput) {
+                    whiteInput.placeholder = 'White Player Name';
+                    whiteInput.classList.remove('input-error');
+                }
+
+                if (blackInput) {
+                    blackInput.style.display = 'block';
+                    blackInput.classList.remove('input-error');
+                }
+
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            };
             const colorBtns = pveOptions.querySelectorAll('.color-choice');
             colorBtns.forEach(btn => {
                 btn.onclick = () => {
