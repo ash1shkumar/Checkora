@@ -544,9 +544,11 @@
         });
       });
     
-      (function() {
+      document.addEventListener('DOMContentLoaded', function() {
         const privacyModal = document.getElementById('privacyModal');
+        if (!privacyModal) return;
         const privacyInner = privacyModal.querySelector('[tabindex="-1"]');
+        if (!privacyInner) return;
         let lastFocused;
     
         window.openPrivacyModal = function(e) {
@@ -585,7 +587,7 @@
             }
           }
         });
-      })();
+      });
     </script>
     <div id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
       <div tabindex="-1" style="position:relative; background:#131522; border:1px solid rgba(240,192,64,0.2); border-radius:16px; width:90%; max-width:700px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden;">
