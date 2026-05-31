@@ -12,20 +12,8 @@
                   q: 9,
                   k: 0
             };
-            const DAILY_PUZZLES = [
-                {
-                    fen: "6k1/5ppp/8/8/8/8/5PPP/6KQ w - - 0 1",
-                    solution: ["h1h7"]
-                },
-                {
-                    fen: "7k/5K2/6Q1/8/8/8/8/8 w - - 0 1",
-                    solution: ["g6g7"]
-                },
-                {
-                    fen: "6k1/5ppp/8/8/8/8/5PPP/5RK1 w - - 0 1",
-                    solution: ["f1e1"]
-                }
-            ];
+    
+            
             const PIECE_IMG = {};
             for (const c of ['w', 'b'])
                 for (const t of ['k', 'q', 'r', 'b', 'n', 'p'])
@@ -87,26 +75,73 @@
                     aiBtn.classList.add("active-mode");
                 }
             }
+
             // =============================================
             // Daily Puzzle 
             // =============================================
-            function getTodayPuzzle() {
+
+            const PUZZLES = [
+                {
+                    id: 1,
+                    fen: "6k1/5ppp/8/8/8/8/5PPP/6KQ w - - 0 1",
+                    solution: ["h1h7"]
+                },
+
+                {
+                    id: 2,
+                    fen: "7k/5K2/6Q1/8/8/8/8/8 w - - 0 1",
+                    solution: ["g6g7"]
+                },
+                
+                {
+                    id: 3,
+                    fen: "6k1/5ppp/8/8/8/8/5PPP/5RK1 w - - 0 1",
+                    solution: ["f1e1"]
+                },
+
+                {
+                    id: 4,
+                    fen: "6k1/5ppp/8/8/8/8/5PPP/5QK1 w - - 0 1",
+                    solution: ["f1h7"]
+                },
+                
+                {
+                    id: 5,
+                    fen: "7k/6pp/8/8/8/8/5PPP/6KQ w - - 0 1",
+                    solution: ["h1h7"]
+                },
+
+                {
+                    id: 6,
+                    fen: "7k/5K2/7Q/8/8/8/8/8 w - - 0 1",
+                    solution: ["h6g7"]
+                },
+
+                {
+                    id: 7,
+                    fen: "6k1/5ppp/8/8/8/8/6PP/5RK1 w - - 0 1",
+                    solution: ["f1e1"]
+                },
+            ];
+
+           function getCurrentWeeklyPuzzle() {
+
                 const today = new Date();
 
-                const seed =
-                    today.getFullYear() * 10000 +
-                    (today.getMonth() + 1) * 100 +
-                    today.getDate();
+                // Monday = 0 ... Sunday = 6
+                const dayIndex =
+                    (today.getDay() + 6) % 7;
 
-                return DAILY_PUZZLES[
-                    seed % DAILY_PUZZLES.length
-                ];
+                return PUZZLES[dayIndex];
             }
-
+    
             async function startDailyPuzzle() {
-                currentPuzzle = getTodayPuzzle();
+                currentPuzzle = getCurrentWeeklyPuzzle();
 
                 dailyPuzzleMode = true;
+                if (restartPuzzleBtn) {
+                    restartPuzzleBtn.style.display = 'block';
+                }
                 puzzleMoveIndex = 0;
 
                 await startNewGame(
@@ -212,6 +247,7 @@
             const welcomeResumeBtn = document.getElementById('welcomeResumeBtn');
             const welcomePvPBtn = document.getElementById('welcomePvPBtn');
             const welcomeAIBtn = document.getElementById('welcomeAIBtn');
+            const welcomeDailyPuzzleBtn = document.getElementById("welcomeDailyPuzzleBtn");
             const welcomeFenInput = document.getElementById('welcomeFenInput');
             const welcomeFenError = document.getElementById('welcomeFenError');
 
@@ -231,6 +267,7 @@
             const newPvPBtn = document.getElementById('newPvPBtn');
             const newAIBtn = document.getElementById('newAIBtn');
             const dailyPuzzleBtn = document.getElementById('dailyPuzzleBtn');
+            const restartPuzzleBtn = document.getElementById('restartPuzzleBtn');
             const newFenBtn = document.getElementById('newFenBtn');
 
             const fenOverlay = document.getElementById('fenOverlay');
@@ -1034,6 +1071,47 @@
                             if (!skipAnimation) await animateMove(fr, fc, tr, tc);
                             board = parseBoard(data.board);
                             turn = data.current_turn;
+
+                            // Daily Puzzle Validation
+                            if (dailyPuzzleMode && currentPuzzle ) {
+
+                                const playedMove =
+                                    `${String.fromCharCode(97 + fc)}${8 - fr}` +
+                                    `${String.fromCharCode(97 + tc)}${8 - tr}`;
+
+                                const expectedMove =
+                                    currentPuzzle.solution[puzzleMoveIndex];
+
+                                if (playedMove === expectedMove) {
+
+                                    puzzleMoveIndex++;
+
+                                    if (puzzleMoveIndex >= currentPuzzle.solution.length) {
+
+                                        showConfirm(
+                                            "🎉 Puzzle Solved!",
+                                            "Come back tomorrow for a new challenge.",
+                                            () => {
+                                                gameLayout.style.visibility = "hidden";
+                                                welcomeOverlay.classList.add("active");
+                                            },
+                                            "#f0c040"
+                                        );
+                                        return;
+                                    }
+                                } else {
+                                    showConfirm(
+                                        "❌ Incorrect Move!",
+                                        "Would you like to try again?",
+                                        () => {
+                                            startDailyPuzzle();
+                                        },
+                                        "#ff4d4d"
+                                    );
+                                    return;
+                                }
+                            }
+                            
                             lastMove = { from: [fr, fc], to: [tr, tc] };
     
                             if (gameMode === 'pvp' && autoFlip) {
@@ -1485,6 +1563,9 @@
             }
 
             function handleGameStatus(status, drawReason) {
+                if (dailyPuzzleMode) {
+                    return false;
+                }
                 if (status === 'checkmate') {
                     endGame('checkmate', turn);
                     return true;
@@ -2330,7 +2411,7 @@
                     '#f0c040'
                 );
             }
-
+    
             async function startNewGame(mode, pColor = 'white', difficulty = 'medium', fen = null, timeLimitMins = null, overrideNames = null) {
                 replayMode = false;
 
@@ -2676,6 +2757,15 @@
                 gameLayout.style.visibility = 'visible';
             };
 
+            if (welcomeDailyPuzzleBtn) {
+                welcomeDailyPuzzleBtn.onclick = async () => {
+
+                    await startDailyPuzzle();
+
+                    welcomeOverlay.classList.remove('active');
+                    gameLayout.style.visibility = 'visible';
+                };
+            }
             
             if (welcomeAIBtn) welcomeAIBtn.onclick = () => {
                 modeSelection.style.display = 'none';
@@ -2891,7 +2981,27 @@
                         "#f0c040"
                     );
                 };
+            
+            if (restartPuzzleBtn)
+                restartPuzzleBtn.onclick = async () => {
 
+                if (!currentPuzzle) return;
+
+                puzzleMoveIndex = 0;
+
+                await startNewGame(
+                    "pvp",
+                    "white",
+                    "medium",
+                    currentPuzzle.fen
+                );
+
+                showStatus(
+                    "Puzzle Restarted",
+                    false
+                );
+            };
+    
             if (newFenBtn) newFenBtn.onclick = () => {
                 showConfirm(
                     "Load from FEN?",
