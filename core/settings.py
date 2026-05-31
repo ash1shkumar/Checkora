@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-for-local-tes
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['.vercel.app', '*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -157,7 +157,7 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 
 # SSL Redirect
 SECURE_SSL_REDIRECT = not DEBUG and not os.environ.get('CI')
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Email Configuration for OTP and Password Reset EMails
 EMAIL_BACKEND = os.getenv(
@@ -180,11 +180,12 @@ LOGIN_REDIRECT_URL = 'index'
 PASSWORD_RESET_TIMEOUT = 300
 
 # SECURITY SETTINGS (Implemented via GSSoC Audit)
+# SECURITY SETTINGS (Implemented via GSSoC Audit)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
 
 # Secret token for authenticating Vercel cron job requests to /api/cron/cleanup-stale-games/
 CRON_SECRET = os.environ.get('CRON_SECRET')
